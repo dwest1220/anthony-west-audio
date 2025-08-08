@@ -1,7 +1,7 @@
 import { fetchWithResponse, fetchWithoutResponse } from './fetcher'
 
 export function getAllInquiries() {
-    return fetchWithResponse('inquiry', {
+    return fetchWithResponse('inquiries', {
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`
         }
@@ -9,7 +9,7 @@ export function getAllInquiries() {
 }
 
 export function getInquiryById(id) {
-    return fetchWithResponse(`inquiry/${id}`, {
+    return fetchWithResponse(`inquiries/${id}`, {
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`
         }
@@ -17,7 +17,7 @@ export function getInquiryById(id) {
 }
 
 export function createInquiry(inquiry) {
-    return fetchWithoutResponse(`inquiry`, {
+    return fetchWithoutResponse(`inquiries`, {
         method: 'POST',
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`,
@@ -28,7 +28,7 @@ export function createInquiry(inquiry) {
 }
 
 export function editInquiry(inquiry) {
-    return fetchWithoutResponse(`inquiry/${inquiry.id}` {
+    return fetchWithoutResponse(`inquiries/${inquiry.id}`, {
         method: 'PUT',
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`,
@@ -39,7 +39,7 @@ export function editInquiry(inquiry) {
 }
 
 export function deleteInquiry() {
-    return fetchWithoutResponse('inquiry', {
+    return fetchWithoutResponse('inquiries', {
         method: 'DELETE',
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`
