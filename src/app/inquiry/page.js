@@ -1,5 +1,5 @@
 import ProtectedRoute from '@/components/routes/ProtectedRoute';
-import InquiryView from '@/components/inquiries/InquiryPage';
+import InquiryView from '@/components/inquiries/InquiryView';
 
 export default function InquiryPage() {
   return (

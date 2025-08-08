@@ -1,5 +1,6 @@
 'use client'
 
+import { createInquiry } from "@/data/inquiry"
 import { useState } from "react"
 
 
