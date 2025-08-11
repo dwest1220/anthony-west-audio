@@ -1,9 +1,12 @@
 'use client'
 
-import { getAllInquiries } from "@/data/inquiry"
+import { getAllInquiries, editInquiry, deleteInquiry } from "@/data/inquiry"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-export const ManageView = ({ onUpdateStatus }) => {
+export const ManageView = () => {
+    // const router = useRouter()
+
     const [inquiries, setInquiries] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -20,11 +23,31 @@ export const ManageView = ({ onUpdateStatus }) => {
     }, [])
 
     const handleStatusChange = (id, newStatus) => {
-        const updated = localInquiries.map(inquiry =>
+        const updatedInquiries = inquiries.map(inquiry =>
             inquiry.id === id ? { ...inquiry, status: newStatus } : inquiry
         )
-        setInquiries(updated)
-        onUpdateStatus?.(id, newStatus)
+        setInquiries(updatedInquiries)
+
+        const inquiryToUpdate = updatedInquiries.find(i => i.id === id)
+        editInquiry(inquiryToUpdate)
+            .catch(err => {
+                console.error("Error updating inquiry:", err)
+            })
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <p className="text-gray-600">Loading inquiries...</p>
+            </div>
+        )
+    }
+
+    const handleDelete = async ({inquiryId}) => {
+        if (confirm("Are you sure you want to delete this inquiry?")) {
+            await deleteInquiry(inquiryId)
+            router.refresh()
+        }
     }
 
     return (
@@ -59,15 +82,21 @@ export const ManageView = ({ onUpdateStatus }) => {
                             </span>
 
                             <select
-                                className="border rounded-lg p-2"
                                 value={inquiry.status}
-                                onChange={e => handleStatusChange(inquiry.id, e.target.value)}
+                                onChange={(e) => handleStatusChange(inquiry.id, e.target.value)}
+                                className="bg-gray-100 text-gray-800 border border-gray-400 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="TENTATIVE">Tentative</option>
+                                <option value="DEFINITE">Definite</option>
                                 <option value="CANCELLED">Cancelled</option>
                                 <option value="SIGNING">Signing</option>
-                                <option value="DEFINITE">Definite</option>
                             </select>
+                            <button
+                            onClick={() => handleDelete(inquiry.id)}
+                            className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 ))}
