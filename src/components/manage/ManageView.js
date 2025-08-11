@@ -1,11 +1,9 @@
 'use client'
 
 import { getAllInquiries, editInquiry, deleteInquiry } from "@/data/inquiry"
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export const ManageView = () => {
-    // const router = useRouter()
 
     const [inquiries, setInquiries] = useState([])
     const [loading, setLoading] = useState(true)
@@ -43,10 +41,16 @@ export const ManageView = () => {
         )
     }
 
-    const handleDelete = async ({inquiryId}) => {
+    const handleDelete = async (inquiryId) => {
         if (confirm("Are you sure you want to delete this inquiry?")) {
-            await deleteInquiry(inquiryId)
-            router.refresh()
+            try {
+                await deleteInquiry(inquiryId)
+                setInquiries(prevInquiries =>
+                    prevInquiries.filter(inquiry => inquiry.id !== inquiryId)
+                )
+            } catch (err) {
+                console.error("Error deleting inquiry:", err)
+            }
         }
     }
 
@@ -70,12 +74,12 @@ export const ManageView = () => {
                         <div className="mt-4 flex items-center gap-4">
                             <span
                                 className={`inline-block px-4 py-2 rounded-lg text-white font-semibold ${inquiry.status === "TENTATIVE"
-                                        ? "bg-yellow-500"
-                                        : inquiry.status === "DEFINITE"
-                                            ? "bg-green-500"
-                                            : inquiry.status === "CANCELLED"
-                                                ? "bg-red-500"
-                                                : "bg-blue-500"
+                                    ? "bg-yellow-500"
+                                    : inquiry.status === "DEFINITE"
+                                        ? "bg-green-500"
+                                        : inquiry.status === "CANCELLED"
+                                            ? "bg-red-500"
+                                            : "bg-blue-500"
                                     }`}
                             >
                                 {inquiry.status}
@@ -92,8 +96,8 @@ export const ManageView = () => {
                                 <option value="SIGNING">Signing</option>
                             </select>
                             <button
-                            onClick={() => handleDelete(inquiry.id)}
-                            className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                                onClick={() => handleDelete(inquiry.id)}
+                                className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
                             >
                                 Delete
                             </button>

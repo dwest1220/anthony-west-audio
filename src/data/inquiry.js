@@ -38,8 +38,8 @@ export function editInquiry(inquiry) {
     })
 }
 
-export function deleteInquiry() {
-    return fetchWithoutResponse('inquiries', {
+export function deleteInquiry(id) {
+    return fetchWithoutResponse(`inquiries/${id}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`
