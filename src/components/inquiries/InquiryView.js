@@ -2,6 +2,8 @@
 
 import { createInquiry } from "@/data/inquiry"
 import { useState } from "react"
+import { ServicesButton } from "../buttons/ServicesButton"
+import { HomeButton } from "../buttons/HomeButton"
 
 
 // const createInquiry = async (inquiry) => {
@@ -57,7 +59,14 @@ export default function InquiryView() {
                     <p className="text-gray-600 text-lg leading-relaxed">
                         Thank you for reaching out. We'll get back to you within 24 hours.
                     </p>
+                    <div className="InquiryButton">
+                        <HomeButton />
+                    </div>
+                    <div className="ServicesButton">
+                        <ServicesButton />
+                    </div>
                 </div>
+                
             </div>
         )
     }

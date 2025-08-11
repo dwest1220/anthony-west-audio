@@ -23,7 +23,7 @@ const HomeView = ({ onInquiryClick }) => {
         {/* Subtitle */}
         <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
           Professional live audio engineering, production management, and technical consulting. 
-          Decades of experience serving Grammy winning artists, venues, and large-scale events.
+          Decades of experience serving Grammy Award winning artists, venues, and large-scale events.
         </p>
 
         {/* CTA Buttons */}
