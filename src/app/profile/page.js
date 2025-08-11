@@ -1,3 +1,8 @@
+import { ProfileView } from "@/components/profile/ProfileView";
+
+
 export default function Profile() {
-    <h1>Test</h1>
+    return (
+        <ProfileView />
+    )
 }

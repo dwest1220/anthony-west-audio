@@ -8,8 +8,8 @@ export function getAllInquiries() {
     })
 }
 
-export function getInquiryById(id) {
-    return fetchWithResponse(`inquiries/${id}`, {
+export function getInquiriesById(id) {
+    return fetchWithResponse(`inquiries?userId=${id}`, {
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`
         }
