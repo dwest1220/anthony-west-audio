@@ -149,7 +149,7 @@ export default function Header() {
           {/* Admin-only Manage tab */}
           {!loading && isAdmin && (
             <Link 
-              href="/admin/dashboard" 
+              href="/manage" 
               className="text-sm/6 font-semibold text-white flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
               <CogIcon className="size-4" />
@@ -223,7 +223,7 @@ export default function Header() {
                   Experience
                 </Link>
                 <Link
-                  href="/gear"
+                  href="/about"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5"
                 >
                   Contact Us
@@ -245,7 +245,7 @@ export default function Header() {
                 {/* Admin-only Manage tab in mobile menu */}
                 {!loading && isAdmin && (
                   <Link
-                    href="/admin/dashboard"
+                    href="/manage"
                     className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5 flex items-center gap-2"
                   >
                     <CogIcon className="size-5" />

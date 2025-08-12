@@ -15,7 +15,7 @@ export const ProfileView = () => {
     }, [user])
 
     return (
-        <section className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8">
+        <section className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-100 to-indigo-100 p-8">
             <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 My Inquiries
             </h1>
@@ -29,8 +29,8 @@ export const ProfileView = () => {
                             key={inquiry.id}
                             className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
                         >
-                            <h2 className="text-xl font-semibold">{inquiry.event}</h2>
-                            <p className="text-gray-600">Event Name: {inquiry.event_name}</p>
+                            <h2 className="text-black font-semibold">{inquiry.event_name}</h2>
+                            <p className="text-gray-600">Event Date: {inquiry.event_date}</p>
                             <span
                                 className={`inline-block mt-4 px-4 py-2 rounded-lg text-white font-semibold ${inquiry.status === "TENTATIVE" ? "bg-yellow-500" :
                                         inquiry.status === "DEFINITE" ? "bg-green-500" :

@@ -67,6 +67,7 @@ export const ManageView = () => {
                         className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
                     >
                         <h2 className="text-black font-semibold">{inquiry.event_name}</h2>
+                        <p className="text-gray-600">Date: {inquiry.event_date}</p>
                         <p className="text-gray-600">Phone: {inquiry.phone}</p>
                         <p className="text-gray-600">Email: {inquiry.email}</p>
                         <p className="text-gray-500">User: {inquiry.user}</p>
