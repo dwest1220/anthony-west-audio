@@ -22,11 +22,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    console.log('AuthProvider: Initializing...');
-    
     // Check for existing token on page load
     const storedToken = getStoredToken();
-    console.log('AuthProvider: Stored token:', storedToken ? 'Found' : 'Not found');
     
     if (storedToken) {
       setToken(storedToken);
@@ -39,17 +36,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const verifyTokenAndGetUser = async (token) => {
-    console.log('AuthProvider: Verifying token and fetching user...');
     try {
       const userData = await fetchUserProfile(token);
-      console.log('AuthProvider: User data received:', userData);
       setUser(userData);
     } catch (error) {
       console.error('AuthProvider: Error fetching user profile:', error);
       // Token is invalid, clear it
       logout();
     } finally {
-      console.log('AuthProvider: Setting loading to false');
       setLoading(false);
     }
   };
@@ -75,16 +69,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Add isAdmin check based on your user data structure
   const isAdmin = user?.is_staff || false;
-
-  console.log('AuthProvider: Current state:', {
-    user,
-    token: token ? 'Present' : 'None',
-    loading,
-    isAdmin,
-    userIsStaff: user?.is_staff
-  });
 
   return (
     <AuthContext.Provider value={{

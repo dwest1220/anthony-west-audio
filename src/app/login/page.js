@@ -17,7 +17,7 @@ export default function LoginPage() {
 
     try {
       await login(credentials);
-      router.push('/inquiry'); // Redirect after successful login
+      router.push('/');
     } catch (err) {
       setError('Invalid credentials');
     } finally {

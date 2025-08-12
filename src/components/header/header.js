@@ -32,6 +32,7 @@ import {
   LightBulbIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 
 const services = [
   { name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/live-audio', icon: SpeakerWaveIcon },
@@ -49,7 +50,15 @@ const callsToAction = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { isAdmin, loading, user, isAuthenticated } = useAuth()
+  const { isAdmin, loading, user, isAuthenticated, logout } = useAuth()
+  const router = useRouter()
+  
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to log out?')) {
+      logout()
+      router.push('/login')
+    }
+  }
   
   return (
     <header className="bg-gray-900">
@@ -129,6 +138,13 @@ export default function Header() {
           <Link href="/profile" className="text-sm/6 font-semibold text-white">
             Profile
           </Link>
+          
+          <button 
+            onClick={handleLogout}
+            className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
+          >
+            Logout
+          </button>
           
           {/* Admin-only Manage tab */}
           {!loading && isAdmin && (
@@ -218,6 +234,13 @@ export default function Header() {
                 >
                   Profile
                 </Link>
+                
+                <button
+                  onClick={handleLogout}
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5 text-left w-full"
+                >
+                  Logout
+                </button>
                 
                 {/* Admin-only Manage tab in mobile menu */}
                 {!loading && isAdmin && (
