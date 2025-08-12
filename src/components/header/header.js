@@ -20,7 +20,8 @@ import {
 import {
   ChevronDownIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  CogIcon
 } from '@heroicons/react/20/solid'
 import {
   SpeakerWaveIcon,
@@ -30,6 +31,7 @@ import {
   WrenchScrewdriverIcon,
   LightBulbIcon
 } from '@heroicons/react/24/outline'
+import { useAuth } from '@/context/AuthContext'
 
 const services = [
   { name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/live-audio', icon: SpeakerWaveIcon },
@@ -47,7 +49,8 @@ const callsToAction = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
+  const { isAdmin, loading, user, isAuthenticated } = useAuth()
+  
   return (
     <header className="bg-gray-900">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
@@ -126,6 +129,17 @@ export default function Header() {
           <Link href="/profile" className="text-sm/6 font-semibold text-white">
             Profile
           </Link>
+          
+          {/* Admin-only Manage tab */}
+          {!loading && isAdmin && (
+            <Link 
+              href="/admin/dashboard" 
+              className="text-sm/6 font-semibold text-white flex items-center gap-1 hover:text-gray-300 transition-colors"
+            >
+              <CogIcon className="size-4" />
+              Manage
+            </Link>
+          )}
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a href="tel:17046579070" className="text-sm/6 font-semibold text-white">
@@ -204,6 +218,17 @@ export default function Header() {
                 >
                   Profile
                 </Link>
+                
+                {/* Admin-only Manage tab in mobile menu */}
+                {!loading && isAdmin && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5 flex items-center gap-2"
+                  >
+                    <CogIcon className="size-5" />
+                    Manage
+                  </Link>
+                )}
               </div>
               <div className="py-6">
                 <a

@@ -17,7 +17,7 @@ export const loginUser = async (credentials) => {
 };
 
 export const fetchUserProfile = async (token) => {
-  const response = await fetch(`${API_URL}/auth/user/`, {
+  const response = await fetch(`${API_URL}/auth/user`, {
     headers: { Authorization: `Token ${token}` }
   });
   
