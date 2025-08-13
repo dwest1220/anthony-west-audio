@@ -116,8 +116,8 @@ export const ManageView = () => {
             
             for (const staffId of toAdd) {
                 await createBookingStaff({
-                    booking: showStaffModal,
-                    staff: staffId
+                    booking_id: showStaffModal,  // Changed from 'booking' to 'booking_id'
+                    staff_id: staffId
                 })
             }
 
@@ -180,7 +180,11 @@ export const ManageView = () => {
                                     <p className="text-green-700">Status: {relatedBooking.status}</p>
                                     {assignedStaff.length > 0 && (
                                         <p className="text-green-700">
-                                            Staff: {assignedStaff.map(s => s.name || s.id).join(', ')}
+                                            Staff: {assignedStaff.map(s => 
+                                                s.first_name && s.last_name 
+                                                    ? `${s.first_name} ${s.last_name}` 
+                                                    : s.full_name || s.user?.username || `Staff ${s.id}`
+                                            ).join(', ')}
                                         </p>
                                     )}
                                 </div>
@@ -267,7 +271,9 @@ export const ManageView = () => {
                                         className="rounded"
                                     />
                                     <span className="text-gray-700">
-                                        {staffMember.name || staffMember.id}
+                                        {staffMember.first_name && staffMember.last_name 
+                                            ? `${staffMember.first_name} ${staffMember.last_name}` 
+                                            : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
                                     </span>
                                 </label>
                             ))}

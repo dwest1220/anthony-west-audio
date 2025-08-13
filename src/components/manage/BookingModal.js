@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createBooking }from "@/data/booking"
+import { createBooking } from "@/data/booking"
 import { createBookingStaff } from '@/data/bookingstaff'
 
 const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => {
@@ -36,7 +36,7 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
         try {
             // Create booking data
             const bookingData = {
-                inquiry: inquiry.id,
+                inquiry_id: inquiry.id, 
                 booking_date: formData.booking_date,
                 end_date: formData.end_date || null,
                 status: formData.status,
@@ -46,13 +46,16 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
 
             // Call createBooking function
             const newBooking = await createBooking(bookingData)
+            console.log('Created booking:', newBooking) // Debug log
 
             // Assign staff to the booking
             for (const staffId of formData.selectedStaff) {
-                await createBookingStaff({
-                    booking: newBooking.id,
-                    staff: staffId
-                })
+                const staffAssignment = {
+                    booking_id: newBooking.id,  // Changed from 'booking' to 'booking_id'
+                    staff_id: staffId
+                }
+                console.log('Creating staff assignment:', staffAssignment) // Debug log
+                await createBookingStaff(staffAssignment)
             }
 
             onBookingCreated()
@@ -174,7 +177,9 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                                         className="rounded text-blue-500"
                                     />
                                     <span className="text-gray-700">
-                                        {staffMember.name || `Staff ${staffMember.id}`}
+                                        {staffMember.first_name && staffMember.last_name 
+                                            ? `${staffMember.first_name} ${staffMember.last_name}` 
+                                            : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
                                     </span>
                                 </label>
                             ))}

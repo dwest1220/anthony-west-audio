@@ -1,4 +1,5 @@
 import { API_URL } from "./fetcher";
+import { fetchWithResponse } from "./fetcher";
 
 export const loginUser = async (credentials) => {
   const response = await fetch(`${API_URL}/auth/login/`, {
@@ -46,3 +47,13 @@ export const removeStoredToken = () => {
     localStorage.removeItem('token');
   }
 };
+
+export function registerUser(userData) {
+  return fetchWithResponse(`auth/register/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(userData)
+  });
+}

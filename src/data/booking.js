@@ -17,14 +17,14 @@ export function getBookingById(id) {
 }
 
 export function createBooking(booking) {
-    return fetchWithoutResponse(`bookings`, {
+    return fetchWithResponse(`bookings`, {
         method: 'POST',
         headers: {
             Authorization: `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(booking)
-    })
+    });
 }
 
 export function editBooking(booking) {
