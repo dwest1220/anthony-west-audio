@@ -34,7 +34,7 @@ export default function RegisterForm() {
       setSuccess(true);
       // Redirect to login after successful registration
       setTimeout(() => {
-        router.push('/login');
+        router.push('/');
       }, 2000);
     } catch (err) {
       setError(err.message || 'Registration failed');
