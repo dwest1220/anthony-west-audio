@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
@@ -55,6 +56,9 @@ export default function LoginPage() {
       >
         {loading ? 'Logging in...' : 'Login'}
       </button>
+      <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            First Time? Register Here.
+      </Link>
     </form>
   );
 }
