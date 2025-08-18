@@ -105,7 +105,7 @@ export default function Header() {
                       <item.icon aria-hidden="true" className="size-6 text-gray-400 group-hover:text-white" />
                     </div>
                     <div className="flex-auto">
-                      <Link href={item.href} className="block font-semibold text-white">
+                      <Link href={`/services/${item.id}`} className="block font-semibold text-white">
                         {item.name}
                         <span className="absolute inset-0" />
                       </Link>
