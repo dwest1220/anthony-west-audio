@@ -80,8 +80,8 @@ export default function ServiceCard({ service, variant = "full" }) {
     return (
       <div className="bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 cursor-pointer hover:-translate-y-1">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-            <Icon className="w-6 h-6" />
+          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Icon className="w-6 h-6 text-blue-600" strokeWidth={2} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
@@ -91,7 +91,7 @@ export default function ServiceCard({ service, variant = "full" }) {
         
         {detailsArray.slice(0, 2).map((detail, idx) => (
           <div key={idx} className="flex items-start gap-2 mb-2">
-            <Check className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+            <Check className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0 stroke-current" />
             <span className="text-gray-700 text-sm">{detail}</span>
           </div>
         ))}
@@ -112,8 +112,8 @@ export default function ServiceCard({ service, variant = "full" }) {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
-              <Icon className="w-10 h-10" />
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center">
+              <Icon className="w-10 h-10 text-blue-600" strokeWidth={2} />
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-3">{service.name}</h1>
@@ -125,15 +125,15 @@ export default function ServiceCard({ service, variant = "full" }) {
           
           <div className="flex items-center gap-8 text-sm">
             <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 fill-current" />
+              <Star className="w-4 h-4 fill-current stroke-current" />
               <span>Expert Level</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 stroke-current" />
               <span>Proven Results</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
+              <Clock className="w-4 h-4 stroke-current" />
               <span>Reliable Delivery</span>
             </div>
           </div>
@@ -232,7 +232,7 @@ export default function ServiceCard({ service, variant = "full" }) {
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Get Project Quote
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 stroke-current" />
             </Link>
             <Link 
               href="/inquiry" 
