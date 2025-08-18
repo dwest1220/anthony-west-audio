@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createBooking } from "@/data/booking"
 import { createBookingStaff } from '@/data/bookingstaff'
+import { X, Calendar, Clock, DollarSign, FileText, Users, Info } from 'lucide-react'
 
 const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => {
     const [formData, setFormData] = useState({
@@ -31,10 +32,14 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
     }
 
     const handleSubmit = async () => {
+        if (!formData.booking_date) {
+            alert('Please select a booking date and time')
+            return
+        }
+
         setLoading(true)
 
         try {
-            // Create booking data
             const bookingData = {
                 inquiry_id: inquiry.id, 
                 booking_date: formData.booking_date,
@@ -44,24 +49,19 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                 notes: formData.notes
             }
 
-            // Call createBooking function
             const newBooking = await createBooking(bookingData)
-            console.log('Created booking:', newBooking) // Debug log
 
-            // Assign staff to the booking
             for (const staffId of formData.selectedStaff) {
                 const staffAssignment = {
-                    booking_id: newBooking.id,  // Changed from 'booking' to 'booking_id'
+                    booking_id: newBooking.id,
                     staff_id: staffId
                 }
-                console.log('Creating staff assignment:', staffAssignment) // Debug log
                 await createBookingStaff(staffAssignment)
             }
 
             onBookingCreated()
             onClose()
             
-            // Reset form
             setFormData({
                 booking_date: '',
                 end_date: '',
@@ -71,7 +71,6 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                 selectedStaff: []
             })
 
-            alert('Booking created successfully!')
         } catch (err) {
             console.error('Error creating booking:', err)
             alert('Error creating booking. Please try again.')
@@ -83,144 +82,206 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/20 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                    Create Booking for: {inquiry?.event_name}
-                </h3>
-                
-                {/* Inquiry Details */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-semibold text-gray-700 mb-2">Inquiry Details</h4>
-                    <p className="text-sm text-gray-600">Event: {inquiry?.event_name}</p>
-                    <p className="text-sm text-gray-600">Original Date: {inquiry?.event_date}</p>
-                    <p className="text-sm text-gray-600">Contact: {inquiry?.email} | {inquiry?.phone}</p>
+        <div className="fixed inset-0 backdrop-blur-md overflow-y-auto z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl mx-auto my-8">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-900">Create New Booking</h2>
+                        <p className="text-sm text-gray-500 mt-1">Convert inquiry to confirmed booking</p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        disabled={loading}
+                        className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md transition-colors duration-200"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
                 </div>
 
-                <div className="space-y-4">
-                    {/* Booking Date */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Booking Date & Time *
-                        </label>
-                        <input
-                            type="datetime-local"
-                            name="booking_date"
-                            value={formData.booking_date}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                        />
-                    </div>
-
-                    {/* End Date */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            End Date & Time (Optional)
-                        </label>
-                        <input
-                            type="datetime-local"
-                            name="end_date"
-                            value={formData.end_date}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                        />
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
-                        </label>
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                        >
-                            <option value="CONFIRMED">Confirmed</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="COMPLETED">Completed</option>
-                            <option value="CANCELLED">Cancelled</option>
-                        </select>
-                    </div>
-
-                    {/* Estimated Cost */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Total Estimated Cost ($)
-                        </label>
-                        <input
-                            type="number"
-                            name="total_estimated_cost"
-                            value={formData.total_estimated_cost}
-                            onChange={handleInputChange}
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                        />
-                    </div>
-
-                    {/* Staff Assignment */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Assign Staff Members
-                        </label>
-                        <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
-                            {staff.map(staffMember => (
-                                <label key={staffMember.id} className="flex items-center space-x-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.selectedStaff.includes(staffMember.id)}
-                                        onChange={() => handleStaffToggle(staffMember.id)}
-                                        className="rounded text-blue-500"
-                                    />
-                                    <span className="text-gray-700">
-                                        {staffMember.first_name && staffMember.last_name 
-                                            ? `${staffMember.first_name} ${staffMember.last_name}` 
-                                            : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
-                                    </span>
-                                </label>
-                            ))}
-                            {staff.length === 0 && (
-                                <p className="text-gray-500 text-sm">No staff members available</p>
-                            )}
+                {/* Modal Body */}
+                <div className="overflow-y-auto max-h-[calc(95vh-120px)]">
+                    {/* Inquiry Summary */}
+                    <div className="p-6 bg-blue-50 border-b border-blue-100">
+                        <div className="flex items-start space-x-3">
+                            <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                            <div>
+                                <h3 className="font-medium text-blue-900 mb-2">Inquiry Details</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span className="text-blue-700 font-medium">Event:</span>
+                                        <p className="text-blue-800">{inquiry?.event_name}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-blue-700 font-medium">Original Date:</span>
+                                        <p className="text-blue-800">{inquiry?.event_date}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-blue-700 font-medium">Contact:</span>
+                                        <p className="text-blue-800">{inquiry?.email}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-blue-700 font-medium">Phone:</span>
+                                        <p className="text-blue-800">{inquiry?.phone}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Notes */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Notes
-                        </label>
-                        <textarea
-                            name="notes"
-                            value={formData.notes}
-                            onChange={handleInputChange}
-                            rows={3}
-                            placeholder="Add any additional notes or details..."
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                        />
-                    </div>
+                    {/* Form Fields */}
+                    <div className="p-6 space-y-6">
+                        {/* Date and Time Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                                    Start Date & Time *
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    name="booking_date"
+                                    value={formData.booking_date}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900"
+                                />
+                            </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 mt-6">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Creating...' : 'Create Booking'}
-                        </button>
-                        <button
-                            onClick={onClose}
-                            disabled={loading}
-                            className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 disabled:bg-gray-400"
-                        >
-                            Cancel
-                        </button>
+                            <div>
+                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                                    End Date & Time
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    name="end_date"
+                                    value={formData.end_date}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Leave empty if single-day event</p>
+                            </div>
+                        </div>
+
+                        {/* Status and Cost Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Booking Status
+                                </label>
+                                <select
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900"
+                                >
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="IN_PROGRESS">In Progress</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CANCELLED">Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                    <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
+                                    Estimated Cost
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-2 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        name="total_estimated_cost"
+                                        value={formData.total_estimated_cost}
+                                        onChange={handleInputChange}
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00"
+                                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Staff Assignment */}
+                        <div>
+                            <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                                <Users className="w-4 h-4 mr-2 text-gray-500" />
+                                Assign Staff Members
+                            </label>
+                            <div className="border border-gray-200 rounded-md max-h-48 overflow-y-auto">
+                                {staff.length === 0 ? (
+                                    <div className="p-4 text-center text-gray-500">
+                                        <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                        <p>No staff members available</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-100">
+                                        {staff.map(staffMember => (
+                                            <label key={staffMember.id} className="flex items-center space-x-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.selectedStaff.includes(staffMember.id)}
+                                                    onChange={() => handleStaffToggle(staffMember.id)}
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-medium text-gray-900">
+                                                        {staffMember.first_name && staffMember.last_name 
+                                                            ? `${staffMember.first_name} ${staffMember.last_name}` 
+                                                            : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {formData.selectedStaff.length > 0 && (
+                                <p className="text-xs text-green-600 mt-2">
+                                    {formData.selectedStaff.length} staff member{formData.selectedStaff.length !== 1 ? 's' : ''} selected
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Notes Section */}
+                        <div>
+                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                <FileText className="w-4 h-4 mr-2 text-gray-500" />
+                                Additional Notes
+                            </label>
+                            <textarea
+                                name="notes"
+                                value={formData.notes}
+                                onChange={handleInputChange}
+                                rows={4}
+                                placeholder="Add any special requirements, instructions, or additional details for this booking..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-none bg-white text-gray-900"
+                            />
+                        </div>
                     </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+                    <button
+                        onClick={onClose}
+                        disabled={loading}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading || !formData.booking_date}
+                        className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
+                    >
+                        {loading && (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                        <span>{loading ? 'Creating...' : 'Create Booking'}</span>
+                    </button>
                 </div>
             </div>
         </div>

@@ -35,12 +35,12 @@ import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 
 const services = [
-  { name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/live-audio', icon: SpeakerWaveIcon },
-  { name: 'Production Management', description: 'Tour & event management, logistics, and team coordination.', href: '/services/production-management', icon: Cog6ToothIcon },
-  { name: 'Church AV Integration', description: 'Design & install audio, video, and lighting systems.', href: '/services/church-av', icon: BuildingOfficeIcon },
-  { name: 'Media & Creative Direction', description: 'Service production, video, graphic design, and set design.', href: '/services/media', icon: VideoCameraIcon },
-  { name: 'Creative & Post-Production', description: 'Video editing, audio post, and worship media.', href: '/services/post-production', icon: WrenchScrewdriverIcon },
-  { name: 'Technical Consulting & Training', description: 'System evaluations, workflow optimization, team training.', href: '/services/consulting', icon: LightBulbIcon },
+  { id: 1, name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/1', icon: SpeakerWaveIcon },
+  { id: 2, name: 'Production Management', description: 'Tour & event management, logistics, and team coordination.', href: '/services/2', icon: Cog6ToothIcon },
+  { id: 3, name: 'Venue AV Integration', description: 'Design & install audio, video, and lighting systems.', href: '/services/3', icon: BuildingOfficeIcon },
+  { id: 4, name: 'Media & Creative Direction', description: 'Service production, video, graphic design, and set design.', href: '/services/4', icon: VideoCameraIcon },
+  { id: 5, name: 'Creative & Post-Production', description: 'Video editing, audio post, and worship media.', href: '/services/5', icon: WrenchScrewdriverIcon },
+  { id: 6, name: 'Technical Consulting & Training', description: 'System evaluations, workflow optimization, team training.', href: '/services/6', icon: LightBulbIcon },
 ]
 
 const callsToAction = [
@@ -105,7 +105,7 @@ export default function Header() {
                       <item.icon aria-hidden="true" className="size-6 text-gray-400 group-hover:text-white" />
                     </div>
                     <div className="flex-auto">
-                      <Link href={item.href} className="block font-semibold text-white">
+                      <Link href={`/services/${item.id}`} className="block font-semibold text-white">
                         {item.name}
                         <span className="absolute inset-0" />
                       </Link>
