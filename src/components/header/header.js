@@ -35,12 +35,12 @@ import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 
 const services = [
-  { name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/live-audio', icon: SpeakerWaveIcon },
-  { name: 'Production Management', description: 'Tour & event management, logistics, and team coordination.', href: '/services/production-management', icon: Cog6ToothIcon },
-  { name: 'Church AV Integration', description: 'Design & install audio, video, and lighting systems.', href: '/services/church-av', icon: BuildingOfficeIcon },
-  { name: 'Media & Creative Direction', description: 'Service production, video, graphic design, and set design.', href: '/services/media', icon: VideoCameraIcon },
-  { name: 'Creative & Post-Production', description: 'Video editing, audio post, and worship media.', href: '/services/post-production', icon: WrenchScrewdriverIcon },
-  { name: 'Technical Consulting & Training', description: 'System evaluations, workflow optimization, team training.', href: '/services/consulting', icon: LightBulbIcon },
+  { id: 1, name: 'Live Audio Engineering', description: 'FOH & Monitor Engineering for concerts, tours, and events.', href: '/services/live-audio', icon: SpeakerWaveIcon },
+  { id: 2, name: 'Production Management', description: 'Tour & event management, logistics, and team coordination.', href: '/services/production-management', icon: Cog6ToothIcon },
+  { id: 3, name: 'Church AV Integration', description: 'Design & install audio, video, and lighting systems.', href: '/services/church-av', icon: BuildingOfficeIcon },
+  { id: 4, name: 'Media & Creative Direction', description: 'Service production, video, graphic design, and set design.', href: '/services/media', icon: VideoCameraIcon },
+  { id: 5, name: 'Creative & Post-Production', description: 'Video editing, audio post, and worship media.', href: '/services/post-production', icon: WrenchScrewdriverIcon },
+  { id: 6, name: 'Technical Consulting & Training', description: 'System evaluations, workflow optimization, team training.', href: '/services/consulting', icon: LightBulbIcon },
 ]
 
 const callsToAction = [
