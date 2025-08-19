@@ -3,10 +3,10 @@
 import { getAllInquiries, editInquiry, deleteInquiry } from "@/data/inquiry"
 import { getAllBookings } from "@/data/booking"
 import { getAllStaff } from "@/data/staff"
-import { getAllBookingStaff, createBookingStaff } from "@/data/bookingstaff"
+import { getAllBookingStaff, createBookingStaff, deleteBookingStaff } from "@/data/bookingstaff"
 import { useEffect, useState } from "react"
 import BookingModal from "./BookingModal"
-import { Calendar, Users, Mail, Phone, Clock, Settings, Trash2, Plus, X, Check } from "lucide-react"
+import { Calendar, Users, Mail, Phone, Clock, Settings, Trash2, Plus, X, Check, AlertCircle } from "lucide-react"
 
 export const ManageView = () => {
     const [inquiries, setInquiries] = useState([])
@@ -18,6 +18,7 @@ export const ManageView = () => {
     const [showStaffModal, setShowStaffModal] = useState(null)
     const [selectedStaff, setSelectedStaff] = useState([])
     const [deleteConfirm, setDeleteConfirm] = useState(null)
+    const [staffAssignmentLoading, setStaffAssignmentLoading] = useState(false)
 
     useEffect(() => {
         Promise.all([
@@ -49,6 +50,8 @@ export const ManageView = () => {
         editInquiry(inquiryToUpdate)
             .catch(err => {
                 console.error("Error updating inquiry:", err)
+                // Revert the change if update fails
+                setInquiries(inquiries)
             })
     }
 
@@ -87,13 +90,14 @@ export const ManageView = () => {
         setShowStaffModal(bookingId)
         const currentAssignments = bookingStaff
             .filter(bs => bs.booking === bookingId)
-            .map(bs => bs.staff)
+            .map(bs => typeof bs.staff === 'object' ? bs.staff.id : bs.staff)
         setSelectedStaff(currentAssignments)
     }
 
     const closeStaffModal = () => {
         setShowStaffModal(null)
         setSelectedStaff([])
+        setStaffAssignmentLoading(false)
     }
 
     const handleStaffToggle = (staffId) => {
@@ -105,38 +109,89 @@ export const ManageView = () => {
     }
 
     const saveStaffAssignments = async () => {
+        setStaffAssignmentLoading(true)
         try {
+            // Get current assignments from DB
             const currentAssignments = bookingStaff
                 .filter(bs => bs.booking === showStaffModal)
-                .map(bs => bs.staff)
+                .map(bs => typeof bs.staff === 'object' ? bs.staff.id : bs.staff)
 
+            // Staff that need to be added
             const toAdd = selectedStaff.filter(staffId => !currentAssignments.includes(staffId))
-            
+
+            // Staff that need to be removed
+            const toRemove = currentAssignments.filter(staffId => !selectedStaff.includes(staffId))
+
+            // Add new staff assignments
             for (const staffId of toAdd) {
-                await createBookingStaff({
-                    booking_id: showStaffModal,
-                    staff_id: staffId
+                await createBookingStaff({ 
+                    booking_id: showStaffModal, 
+                    staff_id: staffId 
                 })
             }
 
+            // Remove old staff assignments
+            for (const staffId of toRemove) {
+                const assignment = bookingStaff.find(
+                    bs => bs.booking === showStaffModal && 
+                         (typeof bs.staff === 'object' ? bs.staff.id === staffId : bs.staff === staffId)
+                )
+                if (assignment) {
+                    await deleteBookingStaff(assignment.id)
+                }
+            }
+
+            // Refresh booking staff data to reflect changes
             const updatedBookingStaff = await getAllBookingStaff()
             setBookingStaff(updatedBookingStaff)
             
             closeStaffModal()
         } catch (err) {
             console.error("Error updating staff assignments:", err)
+        } finally {
+            setStaffAssignmentLoading(false)
         }
     }
 
     const getBookingForInquiry = (inquiryId) => {
-        return bookings.find(booking => booking.inquiry_id === inquiryId)
+        // Try multiple possible relationship patterns
+        return bookings.find(booking => 
+            booking.inquiry_id === inquiryId || 
+            booking.inquiry === inquiryId ||
+            (booking.inquiry && booking.inquiry.id === inquiryId)
+        )
     }
 
     const getStaffForBooking = (bookingId) => {
         return bookingStaff
             .filter(bs => bs.booking === bookingId)
-            .map(bs => staff.find(s => s.id === bs.staff))
+            .map(bs => {
+                // Handle nested staff object or staff ID
+                if (typeof bs.staff === 'object') {
+                    return bs.staff
+                } else {
+                    return staff.find(s => s.id === bs.staff)
+                }
+            })
             .filter(Boolean)
+    }
+
+    const getStaffDisplayName = (staffMember) => {
+        if (!staffMember) return 'Unknown Staff'
+        
+        if (staffMember.first_name && staffMember.last_name) {
+            return `${staffMember.first_name} ${staffMember.last_name}`
+        }
+        if (staffMember.full_name && staffMember.full_name !== staffMember.user?.username) {
+            return staffMember.full_name
+        }
+        if (staffMember.user?.first_name && staffMember.user?.last_name) {
+            return `${staffMember.user.first_name} ${staffMember.user.last_name}`
+        }
+        if (staffMember.user?.username) {
+            return staffMember.user.username
+        }
+        return `Staff ${staffMember.id}`
     }
 
     const getStatusColor = (status) => {
@@ -147,6 +202,19 @@ export const ManageView = () => {
             SIGNING: 'bg-blue-100 text-blue-800 border-blue-200'
         }
         return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return 'Not set'
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'UTC'
+        })
     }
 
     if (loading) {
@@ -200,31 +268,31 @@ export const ManageView = () => {
                                     <div className="p-6 border-b border-gray-100">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                                    {inquiry.event_name}
-                                                </h3>
+                                                <div className="flex items-center space-x-3 mb-3">
+                                                    <h3 className="text-lg font-semibold text-gray-900">
+                                                        {inquiry.event_name}
+                                                    </h3>
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(inquiry.status)}`}>
+                                                        {inquiry.status.toLowerCase().replace('_', ' ')}
+                                                    </span>
+                                                </div>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
                                                     <div className="flex items-center space-x-2">
                                                         <Calendar className="w-4 h-4 text-gray-400" />
-                                                        <span>{inquiry.event_date}</span>
+                                                        <span>{inquiry.event_date ? formatDateTime(inquiry.event_date) : 'Date TBD'}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
                                                         <Phone className="w-4 h-4 text-gray-400" />
-                                                        <span>{inquiry.phone}</span>
+                                                        <span>{inquiry.phone || 'No phone'}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
                                                         <Mail className="w-4 h-4 text-gray-400" />
-                                                        <span>{inquiry.email}</span>
+                                                        <span>{inquiry.email || 'No email'}</span>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
-                                                        <span className="text-xs text-gray-500">User: {inquiry.user}</span>
+                                                        <span className="text-xs text-gray-500">User: {inquiry.user || 'Unknown'}</span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center space-x-3">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(inquiry.status)}`}>
-                                                    {inquiry.status.toLowerCase().replace('_', ' ')}
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -240,18 +308,24 @@ export const ManageView = () => {
                                                     </div>
                                                     <span className="text-green-700">Status: {relatedBooking.status}</span>
                                                 </div>
-                                                {assignedStaff.length > 0 && (
-                                                    <div className="flex items-center space-x-2">
-                                                        <Users className="w-4 h-4 text-green-600" />
-                                                        <span className="text-green-700 text-sm">
-                                                            {assignedStaff.map(s => 
-                                                                s.first_name && s.last_name 
-                                                                    ? `${s.first_name} ${s.last_name}` 
-                                                                    : s.full_name || s.user?.username || `Staff ${s.id}`
-                                                            ).join(', ')}
-                                                        </span>
-                                                    </div>
-                                                )}
+                                                <div className="flex items-center space-x-4">
+                                                    {assignedStaff.length > 0 ? (
+                                                        <div className="flex items-center space-x-2">
+                                                            <Users className="w-4 h-4 text-green-600" />
+                                                            <span className="text-green-700 text-sm">
+                                                                {assignedStaff.map(s => getStaffDisplayName(s)).join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-green-600 italic text-sm">No staff assigned</span>
+                                                    )}
+                                                    <button
+                                                        onClick={() => openStaffModal(relatedBooking.id)}
+                                                        className="text-green-600 hover:text-green-800 font-medium text-sm transition-colors duration-200"
+                                                    >
+                                                        Edit Staff
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -286,7 +360,7 @@ export const ManageView = () => {
                                                     </button>
                                                 )}
 
-                                                {relatedBooking && (
+                                                {/* {relatedBooking && (
                                                     <button
                                                         onClick={() => openStaffModal(relatedBooking.id)}
                                                         className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
@@ -294,7 +368,7 @@ export const ManageView = () => {
                                                         <Settings className="w-4 h-4 mr-2" />
                                                         Manage Staff
                                                     </button>
-                                                )}
+                                                )} */}
 
                                                 <button
                                                     onClick={() => setDeleteConfirm(inquiry.id)}
@@ -324,19 +398,23 @@ export const ManageView = () => {
 
             {/* Staff Assignment Modal */}
             {showStaffModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-900">Assign Staff</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">Manage Staff Assignments</h3>
                             <button
                                 onClick={closeStaffModal}
-                                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+                                disabled={staffAssignmentLoading}
+                                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md disabled:opacity-50"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         
                         <div className="p-6">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Select staff members to assign to this booking:
+                            </p>
                             <div className="space-y-3 max-h-60 overflow-y-auto">
                                 {staff.map(staffMember => (
                                     <label key={staffMember.id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50">
@@ -344,12 +422,11 @@ export const ManageView = () => {
                                             type="checkbox"
                                             checked={selectedStaff.includes(staffMember.id)}
                                             onChange={() => handleStaffToggle(staffMember.id)}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            disabled={staffAssignmentLoading}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                                         />
                                         <span className="text-gray-700 font-medium">
-                                            {staffMember.first_name && staffMember.last_name 
-                                                ? `${staffMember.first_name} ${staffMember.last_name}` 
-                                                : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
+                                            {getStaffDisplayName(staffMember)}
                                         </span>
                                     </label>
                                 ))}
@@ -361,13 +438,22 @@ export const ManageView = () => {
                             <div className="flex space-x-3 mt-6">
                                 <button
                                     onClick={saveStaffAssignments}
-                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium transition-colors duration-200"
+                                    disabled={staffAssignmentLoading}
+                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
-                                    Save Changes
+                                    {staffAssignmentLoading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save Changes'
+                                    )}
                                 </button>
                                 <button
                                     onClick={closeStaffModal}
-                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 font-medium transition-colors duration-200"
+                                    disabled={staffAssignmentLoading}
+                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
@@ -382,9 +468,12 @@ export const ManageView = () => {
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-sm w-full">
                         <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Deletion</h3>
+                            <div className="flex items-center space-x-3 mb-4">
+                                <AlertCircle className="w-6 h-6 text-red-600" />
+                                <h3 className="text-lg font-semibold text-gray-900">Confirm Deletion</h3>
+                            </div>
                             <p className="text-gray-600 mb-6">
-                                Are you sure you want to delete this inquiry? This action cannot be undone.
+                                Are you sure you want to delete this inquiry? This action cannot be undone and will also remove any associated booking and staff assignments.
                             </p>
                             <div className="flex space-x-3">
                                 <button
