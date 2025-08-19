@@ -132,7 +132,7 @@ export default function Header() {
           <Link href="/about" className="text-sm/6 font-semibold text-white">
             Experience
           </Link>
-          <Link href="/inquiry" className="text-sm/6 font-semibold text-white">
+          <Link href="/contact" className="text-sm/6 font-semibold text-white">
             Contact Us
           </Link>
           <Link href="/profile" className="text-sm/6 font-semibold text-white">

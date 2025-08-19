@@ -31,6 +31,7 @@ export const ProfileView = () => {
                         >
                             <h2 className="text-black font-semibold">{inquiry.event_name}</h2>
                             <p className="text-gray-600">Event Date: {inquiry.event_date}</p>
+                            <p className="text-gray-600">Notes: {inquiry.message}</p>
                             <span
                                 className={`inline-block mt-4 px-4 py-2 rounded-lg text-white font-semibold ${inquiry.status === "TENTATIVE" ? "bg-yellow-500" :
                                         inquiry.status === "DEFINITE" ? "bg-green-500" :
