@@ -2,7 +2,7 @@
 
 import { getAllBookings, editBooking, deleteBooking } from "@/data/booking"
 import { getAllStaff } from "@/data/staff"
-import { getAllBookingStaff, createBookingStaff } from "@/data/bookingstaff"
+import { getAllBookingStaff, createBookingStaff, deleteBookingStaff } from "@/data/bookingstaff"
 import { useEffect, useState } from "react"
 import EditBookingModal from "./EditBookingModal"
 import { Calendar, Users, Mail, Phone, Clock, Settings, Trash2, Edit, DollarSign, FileText, X, Check, AlertCircle } from "lucide-react"
@@ -17,6 +17,7 @@ export const BookingManageView = () => {
     const [selectedStaff, setSelectedStaff] = useState([])
     const [deleteConfirm, setDeleteConfirm] = useState(null)
     const [statusFilter, setStatusFilter] = useState('all')
+    const [staffAssignmentLoading, setStaffAssignmentLoading] = useState(false)
 
     useEffect(() => {
         Promise.all([
@@ -46,6 +47,8 @@ export const BookingManageView = () => {
         editBooking(bookingToUpdate)
             .catch(err => {
                 console.error("Error updating booking:", err)
+                // Revert the change if update fails
+                setBookings(bookings)
             })
     }
 
@@ -54,6 +57,10 @@ export const BookingManageView = () => {
             await deleteBooking(bookingId)
             setBookings(prevBookings =>
                 prevBookings.filter(booking => booking.id !== bookingId)
+            )
+            // Also remove associated booking staff records from local state
+            setBookingStaff(prevBookingStaff =>
+                prevBookingStaff.filter(bs => bs.booking !== bookingId)
             )
             setDeleteConfirm(null)
         } catch (err) {
@@ -82,13 +89,14 @@ export const BookingManageView = () => {
         setShowStaffModal(bookingId)
         const currentAssignments = bookingStaff
             .filter(bs => bs.booking === bookingId)
-            .map(bs => bs.staff)
+            .map(bs => typeof bs.staff === 'object' ? bs.staff.id : bs.staff)
         setSelectedStaff(currentAssignments)
     }
 
     const closeStaffModal = () => {
         setShowStaffModal(null)
         setSelectedStaff([])
+        setStaffAssignmentLoading(false)
     }
 
     const handleStaffToggle = (staffId) => {
@@ -100,34 +108,81 @@ export const BookingManageView = () => {
     }
 
     const saveStaffAssignments = async () => {
+        setStaffAssignmentLoading(true)
         try {
+            // Get current assignments from DB
             const currentAssignments = bookingStaff
                 .filter(bs => bs.booking === showStaffModal)
-                .map(bs => bs.staff)
+                .map(bs => typeof bs.staff === 'object' ? bs.staff.id : bs.staff)
 
+            // Staff that need to be added
             const toAdd = selectedStaff.filter(staffId => !currentAssignments.includes(staffId))
-            
+
+            // Staff that need to be removed
+            const toRemove = currentAssignments.filter(staffId => !selectedStaff.includes(staffId))
+
+            // Add new staff assignments
             for (const staffId of toAdd) {
-                await createBookingStaff({
-                    booking_id: showStaffModal,
-                    staff_id: staffId
+                await createBookingStaff({ 
+                    booking_id: showStaffModal, 
+                    staff_id: staffId 
                 })
             }
 
+            // Remove old staff assignments
+            for (const staffId of toRemove) {
+                const assignment = bookingStaff.find(
+                    bs => bs.booking === showStaffModal && 
+                         (typeof bs.staff === 'object' ? bs.staff.id === staffId : bs.staff === staffId)
+                )
+                if (assignment) {
+                    await deleteBookingStaff(assignment.id)
+                }
+            }
+
+            // Refresh booking staff data to reflect changes
             const updatedBookingStaff = await getAllBookingStaff()
             setBookingStaff(updatedBookingStaff)
-            
+
             closeStaffModal()
         } catch (err) {
             console.error("Error updating staff assignments:", err)
+            // You might want to show an error message to the user here
+        } finally {
+            setStaffAssignmentLoading(false)
         }
     }
 
     const getStaffForBooking = (bookingId) => {
         return bookingStaff
             .filter(bs => bs.booking === bookingId)
-            .map(bs => staff.find(s => s.id === bs.staff))
+            .map(bs => {
+                // Handle nested staff object or staff ID
+                if (typeof bs.staff === 'object') {
+                    return bs.staff
+                } else {
+                    return staff.find(s => s.id === bs.staff)
+                }
+            })
             .filter(Boolean)
+    }
+
+    const getStaffDisplayName = (staffMember) => {
+        if (!staffMember) return 'Unknown Staff'
+        
+        if (staffMember.first_name && staffMember.last_name) {
+            return `${staffMember.first_name} ${staffMember.last_name}`
+        }
+        if (staffMember.full_name && staffMember.full_name !== staffMember.user?.username) {
+            return staffMember.full_name
+        }
+        if (staffMember.user?.first_name && staffMember.user?.last_name) {
+            return `${staffMember.user.first_name} ${staffMember.user.last_name}`
+        }
+        if (staffMember.user?.username) {
+            return staffMember.user.username
+        }
+        return `Staff ${staffMember.id}`
     }
 
     const getStatusColor = (status) => {
@@ -147,7 +202,9 @@ export const BookingManageView = () => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'UTC'
         })
     }
 
@@ -280,25 +337,29 @@ export const BookingManageView = () => {
                                     </div>
 
                                     {/* Staff Assignment Info */}
-                                    {assignedStaff.length > 0 && (
-                                        <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Users className="w-4 h-4 text-blue-600" />
-                                                        <span className="text-blue-800 font-medium">Assigned Staff:</span>
-                                                    </div>
-                                                    <span className="text-blue-700">
-                                                        {assignedStaff.map(s => 
-                                                            s.first_name && s.last_name 
-                                                                ? `${s.first_name} ${s.last_name}` 
-                                                                : s.full_name || s.user?.username || `Staff ${s.id}`
-                                                        ).join(', ')}
-                                                    </span>
+                                    <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="flex items-center space-x-2">
+                                                    <Users className="w-4 h-4 text-blue-600" />
+                                                    <span className="text-blue-800 font-medium">Assigned Staff:</span>
                                                 </div>
+                                                {assignedStaff.length > 0 ? (
+                                                    <span className="text-blue-700">
+                                                        {assignedStaff.map(s => getStaffDisplayName(s)).join(', ')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-blue-600 italic">No staff assigned</span>
+                                                )}
                                             </div>
+                                            <button
+                                                onClick={() => openStaffModal(booking.id)}
+                                                className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
+                                            >
+                                                Edit Assignments
+                                            </button>
                                         </div>
-                                    )}
+                                    </div>
 
                                     {/* Notes */}
                                     {booking.notes && (
@@ -376,19 +437,23 @@ export const BookingManageView = () => {
 
             {/* Staff Assignment Modal */}
             {showStaffModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center overflow-y-auto z-50 p-4">
                     <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-900">Assign Staff</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">Manage Staff Assignments</h3>
                             <button
                                 onClick={closeStaffModal}
-                                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+                                disabled={staffAssignmentLoading}
+                                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md disabled:opacity-50"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         
                         <div className="p-6">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Select staff members to assign to this booking:
+                            </p>
                             <div className="space-y-3 max-h-60 overflow-y-auto">
                                 {staff.map(staffMember => (
                                     <label key={staffMember.id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50">
@@ -396,12 +461,11 @@ export const BookingManageView = () => {
                                             type="checkbox"
                                             checked={selectedStaff.includes(staffMember.id)}
                                             onChange={() => handleStaffToggle(staffMember.id)}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            disabled={staffAssignmentLoading}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                                         />
                                         <span className="text-gray-700 font-medium">
-                                            {staffMember.first_name && staffMember.last_name 
-                                                ? `${staffMember.first_name} ${staffMember.last_name}` 
-                                                : staffMember.full_name || staffMember.user?.username || `Staff ${staffMember.id}`}
+                                            {getStaffDisplayName(staffMember)}
                                         </span>
                                     </label>
                                 ))}
@@ -413,13 +477,22 @@ export const BookingManageView = () => {
                             <div className="flex space-x-3 mt-6">
                                 <button
                                     onClick={saveStaffAssignments}
-                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium transition-colors duration-200"
+                                    disabled={staffAssignmentLoading}
+                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                 >
-                                    Save Changes
+                                    {staffAssignmentLoading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save Changes'
+                                    )}
                                 </button>
                                 <button
                                     onClick={closeStaffModal}
-                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 font-medium transition-colors duration-200"
+                                    disabled={staffAssignmentLoading}
+                                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
