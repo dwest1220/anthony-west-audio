@@ -142,6 +142,23 @@ export default function ContactPage() {
             {/* Contact Methods */}
             <div className="space-y-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Contact Methods</h3>
+              {/* Project Inquiry */}
+              <div className="group">
+                <Link 
+                  href="/inquiry"
+                  className="flex items-center gap-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl hover:from-blue-100 hover:to-indigo-100 hover:shadow-lg transition-all duration-300 border border-blue-200"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
+                    <MessageSquare className="w-8 h-8 text-white" strokeWidth={2} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xl font-semibold text-gray-900 mb-1">Project Inquiry</h4>
+                    <p className="text-blue-600 font-medium">Complete project form</p>
+                    <p className="text-gray-600 text-sm">Detailed quotes & project planning</p>
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-blue-600 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </div>
               
               {/* Email */}
               <div className="group">
@@ -181,23 +198,6 @@ export default function ContactPage() {
                 </a>
               </div>
 
-              {/* Project Inquiry */}
-              <div className="group">
-                <Link 
-                  href="/inquiry"
-                  className="flex items-center gap-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl hover:from-blue-100 hover:to-indigo-100 hover:shadow-lg transition-all duration-300 border border-blue-200"
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
-                    <MessageSquare className="w-8 h-8 text-white" strokeWidth={2} />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-semibold text-gray-900 mb-1">Project Inquiry</h4>
-                    <p className="text-blue-600 font-medium">Complete project form</p>
-                    <p className="text-gray-600 text-sm">Detailed quotes & project planning</p>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-blue-600 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </div>
             </div>
 
             {/* Response Times & Info */}
