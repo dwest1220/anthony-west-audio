@@ -182,15 +182,15 @@ export const ManageView = () => {
         if (staffMember.first_name && staffMember.last_name) {
             return `${staffMember.first_name} ${staffMember.last_name}`
         }
-        if (staffMember.full_name && staffMember.full_name !== staffMember.user?.username) {
-            return staffMember.full_name
-        }
-        if (staffMember.user?.first_name && staffMember.user?.last_name) {
-            return `${staffMember.user.first_name} ${staffMember.user.last_name}`
-        }
-        if (staffMember.user?.username) {
-            return staffMember.user.username
-        }
+        // if (staffMember.full_name && staffMember.full_name !== staffMember.user?.username) {
+        //     return staffMember.full_name
+        // }
+        // if (staffMember.user?.first_name && staffMember.user?.last_name) {
+        //     return `${staffMember.user.first_name} ${staffMember.user.last_name}`
+        // }
+        // if (staffMember.user?.username) {
+        //     return staffMember.user.username
+        // }
         return `Staff ${staffMember.id}`
     }
 

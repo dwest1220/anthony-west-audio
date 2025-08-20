@@ -48,12 +48,22 @@ export const removeStoredToken = () => {
   }
 };
 
-export function registerUser(userData) {
-  return fetchWithResponse(`auth/register/`, {
+export const registerUser = async (userData) => {
+  const response = await fetchWithResponse(`auth/register/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(userData)
   });
-}
+
+  if (!response) {
+    throw new Error("No response from server")
+  }
+  
+  if (response.token) {
+    setStoredToken(response.token);
+  }
+  
+  return response;
+};

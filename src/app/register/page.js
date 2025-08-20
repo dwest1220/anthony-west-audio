@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { registerUser } from '@/data/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -17,6 +17,7 @@ export default function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { register } = useAuth(); // Use the register function from context
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,15 +29,21 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
-      const response = await registerUser(formData);
-      console.log('Registered:', response);
-
+      console.log('Starting registration process...');
+      
+      // Use the register function from AuthContext
+      await register(formData);
+      
+      console.log('Registration complete, user should be authenticated');
       setSuccess(true);
-      // Redirect to login after successful registration
+      
+      // Redirect to dashboard - user should now be properly authenticated
       setTimeout(() => {
-        router.push('/');
+        router.push('/dashboard'); // or your protected route
       }, 2000);
+      
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
@@ -54,10 +61,10 @@ export default function RegisterForm() {
               </svg>
             </div>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Registration Successful!
+              Welcome! Registration Complete!
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Redirecting you to login...
+              You're now logged in. Redirecting to your dashboard...
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createBooking } from "@/data/booking"
 import { createBookingStaff } from '@/data/bookingstaff'
-import { X, Calendar, Clock, DollarSign, FileText, Users, Info } from 'lucide-react'
+import { X, Calendar, Clock, DollarSign, FileText, Users, Info, Phone, Mail } from 'lucide-react'
 
 const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => {
     const [formData, setFormData] = useState({
@@ -10,6 +10,8 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
         status: 'CONFIRMED',
         total_estimated_cost: '',
         notes: '',
+        contact_phone: '',
+        contact_email: '',
         selectedStaff: []
     })
     const [loading, setLoading] = useState(false)
@@ -46,7 +48,9 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                 end_date: formData.end_date || null,
                 status: formData.status,
                 total_estimated_cost: formData.total_estimated_cost || null,
-                notes: formData.notes
+                notes: formData.notes,
+                contact_phone: formData.contact_phone,
+                contact_email: formData.contact_email
             }
 
             const newBooking = await createBooking(bookingData)
@@ -68,6 +72,8 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                 status: 'CONFIRMED',
                 total_estimated_cost: '',
                 notes: '',
+                contact_phone: '',
+                contact_email: '',
                 selectedStaff: []
             })
 
@@ -161,6 +167,34 @@ const BookingModal = ({ isOpen, onClose, inquiry, staff, onBookingCreated }) => 
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Leave empty if single-day event</p>
+                            </div>
+                            <div>
+                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                    <Phone className='w-4 h-4 mr-2 text-gray-500' />
+                                    Contact Phone Number
+                                </label>
+                                <input
+                                    type='tel'
+                                    name='contact_phone'
+                                    value={formData.contact_phone}
+                                    onChange={handleInputChange}
+                                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900'
+                                    placeholder='(123) 123-4567'
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                    <Mail className='w-4 h-4 mr-2 text-gray-500' />
+                                    Contact Email
+                                </label>
+                                <input
+                                    type='email'
+                                    name='contact_email'
+                                    value={formData.contact_email}
+                                    onChange={handleInputChange}
+                                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white text-gray-900'
+                                    placeholder='your@email.com'
+                                />
                             </div>
                         </div>
 
