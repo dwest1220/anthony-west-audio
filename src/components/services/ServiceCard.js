@@ -69,7 +69,6 @@ export default function ServiceCard({ service, variant = "full" }) {
     "Software": ["Shure Wireless Workbench", "Meyer Sound Compass", "Dante Controller"]
   }
 
-  // 🔹 Use placeholders if DB fields are missing
   const finalApproach = service.approach || approach
   const finalKeyPoints = service.keyPoints || keyPoints
   const finalProjects = service.projects || projects
