@@ -315,11 +315,11 @@ export const BookingManageView = () => {
                                                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                                                         <div className="flex items-center space-x-2">
                                                             <Phone className="w-4 h-4 text-gray-400" />
-                                                            <span>{booking.inquiry.phone}</span>
+                                                            <span>{booking.contact_phone}</span>
                                                         </div>
                                                         <div className="flex items-center space-x-2">
                                                             <Mail className="w-4 h-4 text-gray-400" />
-                                                            <span>{booking.inquiry.email}</span>
+                                                            <span>{booking.contact_email}</span>
                                                         </div>
                                                     </div>
                                                 )}
