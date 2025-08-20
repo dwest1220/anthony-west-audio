@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   loginUser, 
+  registerUser,
   fetchUserProfile, 
   getStoredToken, 
   setStoredToken, 
@@ -11,7 +12,7 @@ import {
 
 const AuthContext = createContext();
 
-const PUBLIC_ROUTES = ['/register', '/login', '/'];
+const PUBLIC_ROUTES = ['/register', '/login', '/', '/about', '/contact', '/services'];
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     const storedToken = getStoredToken();
     
     if (storedToken) {
+      console.log('AuthProvider: Found stored token, verifying...');
       setToken(storedToken);
       // Verify token and get user info
       verifyTokenAndGetUser(storedToken);
@@ -53,7 +55,9 @@ export const AuthProvider = ({ children }) => {
 
   const verifyTokenAndGetUser = async (token) => {
     try {
+      console.log('AuthProvider: Verifying token and fetching user...');
       const userData = await fetchUserProfile(token);
+      console.log('AuthProvider: User data received:', userData);
       setUser(userData);
     } catch (error) {
       console.error('AuthProvider: Error fetching user profile:', error);
@@ -66,14 +70,60 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
+      console.log('AuthProvider: Attempting login...');
       const data = await loginUser(credentials);
       
       setStoredToken(data.token);
       setToken(data.token);
-      setUser(data.user); // Assuming login returns user data
       
+      // If login response includes user data, use it. Otherwise fetch it.
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        await verifyTokenAndGetUser(data.token);
+      }
+      
+      console.log('AuthProvider: Login successful');
       return data;
     } catch (error) {
+      console.error('AuthProvider: Login failed:', error);
+      throw error;
+    }
+  };
+
+  // NEW: Register function that handles the full auth flow
+  const register = async (userData) => {
+    try {
+      console.log('AuthProvider: Attempting registration...');
+      
+      // Step 1: Register the user
+      const registerResponse = await registerUser(userData);
+      console.log('AuthProvider: Registration successful');
+      
+      // Step 2: If registration returned a token, use it. Otherwise, login.
+      if (registerResponse.token) {
+        console.log('AuthProvider: Token received from registration');
+        setStoredToken(registerResponse.token);
+        setToken(registerResponse.token);
+        
+        if (registerResponse.user) {
+          setUser(registerResponse.user);
+        } else {
+          await verifyTokenAndGetUser(registerResponse.token);
+        }
+      } else {
+        console.log('AuthProvider: No token from registration, attempting login...');
+        // Auto-login after registration
+        await login({
+          username: userData.username,
+          password: userData.password
+        });
+      }
+      
+      console.log('AuthProvider: Registration and authentication complete');
+      return registerResponse;
+    } catch (error) {
+      console.error('AuthProvider: Registration failed:', error);
       throw error;
     }
   };
@@ -103,6 +153,7 @@ export const AuthProvider = ({ children }) => {
         user,
         token,
         login,
+        register, // NEW: Add register function
         logout,
         loading,
         isAuthenticated: !!user && !!token,
@@ -119,6 +170,7 @@ export const AuthProvider = ({ children }) => {
       user,
       token,
       login,
+      register, // NEW: Add register function
       logout,
       loading,
       isAuthenticated: !!user && !!token,

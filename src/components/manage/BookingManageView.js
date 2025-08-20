@@ -173,15 +173,6 @@ export const BookingManageView = () => {
         if (staffMember.first_name && staffMember.last_name) {
             return `${staffMember.first_name} ${staffMember.last_name}`
         }
-        if (staffMember.full_name && staffMember.full_name !== staffMember.user?.username) {
-            return staffMember.full_name
-        }
-        if (staffMember.user?.first_name && staffMember.user?.last_name) {
-            return `${staffMember.user.first_name} ${staffMember.user.last_name}`
-        }
-        if (staffMember.user?.username) {
-            return staffMember.user.username
-        }
         return `Staff ${staffMember.id}`
     }
 
@@ -354,9 +345,10 @@ export const BookingManageView = () => {
                                             </div>
                                             <button
                                                 onClick={() => openStaffModal(booking.id)}
-                                                className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
                                             >
-                                                Edit Assignments
+                                                <Settings className="w-4 h-4" />
+                                                <span>Edit Staff</span>
                                             </button>
                                         </div>
                                     </div>
@@ -401,15 +393,6 @@ export const BookingManageView = () => {
                                                     <Edit className="w-4 h-4 mr-2" />
                                                     Edit Details
                                                 </button>
-
-                                                <button
-                                                    onClick={() => openStaffModal(booking.id)}
-                                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
-                                                >
-                                                    <Settings className="w-4 h-4 mr-2" />
-                                                    Manage Staff
-                                                </button>
-
                                                 <button
                                                     onClick={() => setDeleteConfirm(booking.id)}
                                                     className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-200 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
