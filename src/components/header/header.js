@@ -175,7 +175,7 @@ export default function Header() {
                 src="/logo.png"
                 className="h-8 w-auto"
               />
-              <span className="text-white font-bold">Anthony West Productions</span>
+              <span className="text-white font-bold">Anthony West Audio</span>
             </Link>
             <button
               type="button"
