@@ -52,14 +52,14 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isAdmin, loading, user, isAuthenticated, logout } = useAuth()
   const router = useRouter()
-  
+
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out?')) {
       logout()
       router.push('/login')
     }
   }
-  
+
   return (
     <header className="bg-gray-900">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
@@ -138,18 +138,27 @@ export default function Header() {
           <Link href="/profile" className="text-sm/6 font-semibold text-white">
             Profile
           </Link>
-          
-          <button 
-            onClick={handleLogout}
-            className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
-          >
-            Logout
-          </button>
-          
+
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              href="/register"
+              className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
+            >
+              Register
+            </Link>
+          )}
+
           {/* Admin-only Manage tab */}
           {!loading && isAdmin && (
-            <Link 
-              href="/manage" 
+            <Link
+              href="/manage"
               className="text-sm/6 font-semibold text-white flex items-center gap-1 hover:text-gray-300 transition-colors"
             >
               <CogIcon className="size-4" />
@@ -234,14 +243,23 @@ export default function Header() {
                 >
                   Profile
                 </Link>
-                
-                <button
-                  onClick={handleLogout}
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5 text-left w-full"
-                >
-                  Logout
-                </button>
-                
+
+                {isAuthenticated ? (
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    href="/register"
+                    className="text-sm/6 font-semibold text-white hover:text-gray-300 transition-colors"
+                  >
+                    Register
+                  </Link>
+                )}
+
                 {/* Admin-only Manage tab in mobile menu */}
                 {!loading && isAdmin && (
                   <Link
